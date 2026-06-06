@@ -1,0 +1,101 @@
+{
+  "portal_url": "https://eprtyres.cpcb.gov.in/login",
+  "browser": "chrome",
+  "headless": false,
+  "timeout_seconds": 30,
+  "selectors": {
+    "login_id": ["//*[@id='email']"],
+    "password": ["//*[@id='password1']"],
+    "captcha_input": ["//*[@id='textinput']"],
+    "login_button": ["//*[@id='loginBtn']"],
+    "otp_input": ["//*[@id='form3Example3']"],
+    "otp_submit_button": ["//*[@id='otp']"],
+    "role_recycler": ["//*[@id='formId']//input[contains(@value,'recycler')]"],
+    "menu_view_procurement": ["//*[@id='slide-out']//span[contains(text(),'Procurement Details')]"],
+    "button_add_procurement": ["//*[@id='content-wrapper']//a[contains(text(),'Add Procurement')]"],
+    "menu_recycled_data": ["//*[@id='slide-out']//span[contains(text(),'Recycled Data')]"],
+    "button_add_recycling": ["//*[@id='recycledDataTable_wrapper']//button/span[contains(text(),'Add Recycling Data')]"],
+    "menu_create_epr_credits": ["//*[@id='slide-out']//span[contains(text(),'Create EPR Credits')]"],
+    "tab_domestic": ["//*[@id='content']//a[text()='Domestic']"],
+    "tab_import": ["//*[@id='content']//a[text()='Import']"],
+    "submit_buttons": [
+      "//*[@id='submitData']",
+      "//*[@id='addRecycledDataForm']//button[@value='save']"
+    ],
+    "logout_button": ["//*[@id='slide-out']//span[contains(text(),'Logout')]"],
+    "loader_overlays": ["//*[@id='loader-wrapper']"],
+    "select_options": "//*[contains(@id,'select-options')]",
+    "month_dropdown": "//*[@id='ui-datepicker-div']//select[@data-handler='selectMonth']",
+    "year_dropdown": "//*[@id='ui-datepicker-div']//select[@data-handler='selectYear']",
+    "select_day": "//*[@id='ui-datepicker-div']/table/tbody//a",
+    "success_messages": [
+      ".alert-success",
+      ".swal2-success",
+      "//div[contains(@class, 'success')]",
+      "//*[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'success')]"
+    ],
+    "error_messages": [
+      ".alert-danger",
+      ".alert-error",
+      ".swal2-error",
+      "//div[contains(@class, 'error')]",
+      "//*[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'error')]"
+    ]
+  },
+  "field_selectors": {
+    "procurement": {
+      "finance_year": ["//*[@id='procurement_form']/div[2]/div[1]/div[1]/input"],
+      "source_of_waste_tyre": ["//*[@id='procurement_form']/div[2]/div[2]/div[1]/input"],
+      "supplier_name": ["//*[@id='procurement_form']//div[contains(text(),'Name of waste tyre supplier')]/input"],
+      "raw_material_type": ["//*[@id='procurement_form']/div[4]/div[2]/div[1]/input"],
+      "quantity_received_tonnes": ["//*[@id='procurement_form']/div[5]/div[1]/input"],
+      "invoice_number": ["//*[@id='procurement_form']/div[5]/div[2]/input"],
+      "supplier_gst": ["//*[@id='seller_gst_no']"],
+      "purchase_date": ["//*[@id='purchased_date']"],
+      "invoice_file": ["//*[@id='invoice_file']"]
+    },
+    "recycling": {
+      "finance_year": ["//*[@id='addRecycledDataForm']/div/div[1]/div[1]/input"],
+      "source_of_waste_tyre": ["//*[@id='addRecycledDataForm']/div/div[2]/div[1]/input"],
+      "recycled_material_type": ["//*[@id='addRecycledDataForm']/div/div[3]/div[1]/input"],
+      "quantity_processed_mt": ["//*[@id='processed_qty']"],
+      "recycled_date": ["//*[@id='recycled_date']"]
+    },
+    "sales": {
+      "sales_date": ["//*[@id='start_date']"],
+      "invoice_number": ["//*[@id='content']/div[3]/div/form/div[5]/div[1]/input"],
+      "e_invoice_number": ["//*[@id='content']/div[3]/div/form/div[5]/div[2]/input"],
+      "buyer_name": ["//*[@id='content']/div[3]/div/form/div[5]/div[3]/input"],
+      "hsn_code": ["//*[@id='content']/div[3]/div/form/div[5]/div[4]/input"],
+      "principal_amount_rs": ["//*[@id='content']/div[3]/div/form/div[6]/div[1]/input"],
+      "quantity_sold_kg": ["//*[@id='content']/div[3]/div/form/div[6]/div[2]/input"],
+      "buyer_address": ["//*[@id='content']/div[3]/div/form/div[8]/div/input"],
+      "invoice_file": ["//*[@id='invoice_file']"],
+      "end_product_table": ["//*[@id='uploaddbl']"]
+    }
+  },
+  "column_aliases": {
+    "finance_year": ["Finance Year", "Financial Year", "FY"],
+    "source_of_waste_tyre": ["Source of Waste Tyre", "Source Tyre"],
+    "supplier_name": ["Name of Waste Tyre Supplier", "Supplier Name"],
+    "raw_material_type": ["Type of Raw Material", "Raw Material Type"],
+    "quantity_received_tonnes": ["Quantities Received (Tonnes)", "Quantity Received", "Qty Received"],
+    "invoice_number": ["Invoice Number", "Invoice No"],
+    "supplier_gst": ["GST Number of Supplier", "Supplier GST", "GSTIN"],
+    "purchase_date": ["Date of Purchase", "Purchase Date"],
+    "invoice_file": ["Invoice Filename", "Invoice File", "Invoice PDF", "Invoice"],
+    "recycled_material_type": ["Type of Recycled Material", "Recycled Material Type"],
+    "quantity_processed_mt": ["Quantity Processed (MT)", "Quantity Processed"],
+    "recycled_date": ["Recycled Date", "Date"],
+    "sales_type": ["Sales Type", "Domestic/Import", "Tab"],
+    "sales_date": ["Sales Date", "Date"],
+    "e_invoice_number": ["E-Invoice Number", "E Invoice Number"],
+    "buyer_name": ["Name of End Product Buyer", "Buyer Name"],
+    "hsn_code": ["HSN Code", "HSN"],
+    "principal_amount_rs": ["Principal Amount (Rs.)", "Principal Amount"],
+    "quantity_sold_kg": ["Quantity of End Product Sold (Kg)", "Quantity Sold Kg"],
+    "buyer_address": ["Address of End Product Buyer", "Buyer Address"],
+    "end_product_weight_mt": ["Weight of End Product (MT)", "Weight MT"],
+    "end_product_table": ["List of End Products"]
+  }
+}
