@@ -18,35 +18,25 @@
     "menu_create_epr_credits": ["//*[@id='slide-out']//span[contains(text(),'Create EPR Credits')]"],
     "tab_domestic": ["//*[@id='content']//a[text()='Domestic']"],
     "tab_import": ["//*[@id='content']//a[text()='Import']"],
-    "submit_buttons": [
-      "//*[@id='submitData']",
-      "//*[@id='addRecycledDataForm']//button[@value='save']"
-    ],
+    "submit_button": ["//*[@id='submitData']"],
+    "save_button": ["//*[@id='addRecycledDataForm']//button[@value='save']"],
     "logout_button": ["//*[@id='slide-out']//span[contains(text(),'Logout')]"],
     "loader_overlays": ["//*[@id='loader-wrapper']"],
     "select_options": "//*[contains(@id,'select-options')]",
     "month_dropdown": "//*[@id='ui-datepicker-div']//select[@data-handler='selectMonth']",
     "year_dropdown": "//*[@id='ui-datepicker-div']//select[@data-handler='selectYear']",
     "select_day": "//*[@id='ui-datepicker-div']/table/tbody//a",
-    "success_messages": [
-      ".alert-success",
-      ".swal2-success",
-      "//div[contains(@class, 'success')]",
-      "//*[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'success')]"
-    ],
-    "error_messages": [
-      ".alert-danger",
-      ".alert-error",
-      ".swal2-error",
-      "//div[contains(@class, 'error')]",
-      "//*[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'error')]"
-    ]
+    "procurement_success_message": ["//div[contains(text(),'Procurement data created successfully')]"],
+    "recycling_success_message": ["//*[@id='content-wrapper']/div[2]/div"],
+    "sales_success_message": ["//*[@id='content']/div[2]/div/p[text()='Invoice updated successfully!']"]
   },
   "field_selectors": {
     "procurement": {
       "finance_year": ["//*[@id='procurement_form']/div[2]/div[1]/div[1]/input"],
       "source_of_waste_tyre": ["//*[@id='procurement_form']/div[2]/div[2]/div[1]/input"],
       "supplier_name": ["//*[@id='procurement_form']//div[contains(text(),'Name of waste tyre supplier')]/input"],
+      "contact_details": ["//*[@id='seller_mobile']"],
+      "supplier_address": ["//*[@id='procurement_form']/div[4]/div[1]/input"],
       "raw_material_type": ["//*[@id='procurement_form']/div[4]/div[2]/div[1]/input"],
       "quantity_received_tonnes": ["//*[@id='procurement_form']/div[5]/div[1]/input"],
       "invoice_number": ["//*[@id='procurement_form']/div[5]/div[2]/input"],
@@ -78,6 +68,8 @@
     "finance_year": ["Finance Year", "Financial Year", "FY"],
     "source_of_waste_tyre": ["Source of Waste Tyre", "Source Tyre"],
     "supplier_name": ["Name of Waste Tyre Supplier", "Supplier Name"],
+    "contact_details": ["Contact Details"],
+    "supplier_address": ["Address of waste tyre supplier"],
     "raw_material_type": ["Type of Raw Material", "Raw Material Type"],
     "quantity_received_tonnes": ["Quantities Received (Tonnes)", "Quantity Received", "Qty Received"],
     "invoice_number": ["Invoice Number", "Invoice No"],

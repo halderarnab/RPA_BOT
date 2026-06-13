@@ -33,3 +33,10 @@ python app.py
 - **Continue Data Entry**: logs in if needed, validates files, then resumes entry for procurement, recycling, and sales rows.
 - **Show Errors**: displays recent `ERROR` entries from `logs/rpa_bot.log`.
 - **Logout**: logs out the current logged in user.
+
+## In sales excel file, for "List of End Products" column:
+- Products should be comma (,) seperated and each product and its weight should be colon (:) seperated.
+- Example: Crumb Rubber:3, Reclaimed Rubber:5
+- In case of Pyrolysis product the value should be:
+    - Pyrolysis oil or Char:Batch-10
+    - Pyrolysis oil or Char:Continuous-10

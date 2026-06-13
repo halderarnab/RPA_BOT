@@ -15,8 +15,18 @@ class DataRow:
 
     @property
     def row_id(self) -> str:
+        # Procurement and Sales
         invoice = str(self.values.get("invoice_number") or "").strip()
-        return f"row-{self.row_number}-{invoice}" if invoice else f"row-{self.row_number}"
+        # Procurement
+        supplier_name = str(self.values.get("supplier_name") or "").strip()
+        # Sales
+        buyer_name = str(self.values.get("buyer_name") or "").strip()
+        # Recycling
+        source_of_waste_tyre = str(self.values.get("source_of_waste_tyre") or "").strip()
+        recycled_material_type = str(self.values.get("recycled_material_type") or "").strip()
+        quantity_processed_mt = str(self.values.get("quantity_processed_mt") or "").strip()
+        recycled_date = str(self.values.get("recycled_date") or "").strip()
+        return f"row-{self.row_number}-{invoice}-{supplier_name}-{buyer_name}" if invoice else f"row-{self.row_number}-{source_of_waste_tyre}-{recycled_material_type}-{quantity_processed_mt}-{recycled_date}"
 
 
 class ExcelDataReader:

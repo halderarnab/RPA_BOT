@@ -9,6 +9,8 @@ MANDATORY_FIELDS = {
         "finance_year",
         "source_of_waste_tyre",
         "supplier_name",
+        "contact_details",
+        "supplier_address",
         "raw_material_type",
         "quantity_received_tonnes",
         "invoice_number",

@@ -109,10 +109,10 @@ class CpcbWasteTyreBot:
                     self._select_sales_tab(row.values)
 
                 self._fill_fields(dataset, row.values)
-                self._submit()
-                # message = self._capture_status_message()
+                self._submit(dataset)
+                message = self._capture_status_message(dataset)
                 self.state.mark_done(dataset, row.row_id)
-                self.log.info("%s row %s completed: %s", dataset, row.row_number, "message")
+                self.log.info("%s row %s completed: %s", dataset, row.row_number, message)
                 self.status(f"{dataset.title()} row {row.row_number} completed")
             except Exception as exc:
                 self.state.mark_failed(dataset, row.row_id)
@@ -163,19 +163,42 @@ class CpcbWasteTyreBot:
         self._click_first(selector_key)
         self.log.info("Selected login role: %s", role)
 
-    def _submit(self) -> None:
-        self._click_any(self.config.selectors.get("submit_buttons", []), "submit button")
+    def _submit(self, dataset: str) -> None:
+        if dataset == "recycling":
+            self._click_any(self.config.selectors.get("save_button", []), "submit button")
+        else:
+            self._click_any(self.config.selectors.get("submit_button", []), "submit button")
 
-    def _capture_status_message(self) -> str:
-        for key in ("success_messages", "error_messages"):
-            for selector in self.config.selectors.get(key, []):
-                try:
-                    element = self._find_with_retry(selector, timeout=5)
-                    text = element.text.strip()
-                    if text:
-                        return text
-                except TimeoutException:
-                    continue
+    def _capture_status_message(self, dataset: str) -> str:
+        # Recycling - //*[@id="content-wrapper"]/div[2]/div
+        # Sales - //*[@id="content"]/div[2]/div/p[text()='Invoice updated successfully!']
+        if dataset == "procurement":
+            procurement_success_message = self.config.selectors.get("procurement_success_message")
+            try:
+                element = self._find_with_retry(procurement_success_message, timeout=1)
+                text = element.text.strip()
+                if text:
+                    return text
+            except Exception as exc:
+                self.log.warning("Failed: Procurement success message not found. " + exc)
+        elif dataset == "recycling":
+            recycling_success_message = self.config.selectors.get("recycling_success_message")
+            try:
+                element = self._find_with_retry(recycling_success_message, timeout=2)
+                text = element.text.strip()
+                if text:
+                    return text
+            except Exception as exc:
+                self.log.warning("Failed: Recycling success message not found. " + exc)
+        else:
+            sales_success_message = self.config.selectors.get("sales_success_message")
+            try:
+                element = self._find_with_retry(sales_success_message, timeout=2)
+                text = element.text.strip()
+                if text:
+                    return text
+            except Exception as exc:
+                self.log.warning("Failed: Sales success message not found. " + exc)
         return "No status message detected"
 
     def _type_first(self, selector_key: str, value: str) -> None:
@@ -184,7 +207,7 @@ class CpcbWasteTyreBot:
     def _click_first(self, selector_key: str) -> None:
         count  = 0
         while(not self._is_clickable(selector_key, timeout = 5) and count < 10):
-            print(str(count) + ", Waiting for clickability of: " + selector_key)
+            # print(str(count) + ", Waiting for clickability of: " + selector_key)
             count += 1
             sleep(1)
         if(not self._is_clickable(selector_key, timeout = 5)):
@@ -206,7 +229,7 @@ class CpcbWasteTyreBot:
     def _click_with_retry(
         self,
         selector: str,
-        attempts: int = 10,
+        attempts: int = 5,
         timeout: int | None = None,
         pause_seconds: float = 1.0,
     ) -> None:
@@ -228,6 +251,7 @@ class CpcbWasteTyreBot:
                     sleep(pause_seconds)
             except Exception as exc:
                 last_error = exc
+                self.log.warning("Click attempt %s/%s FAILED for selector %s: %s", attempt, attempts, selector, exc)
                 if attempt < attempts:
                     sleep(pause_seconds)
         raise TimeoutException(f"Could not click element after {attempts} attempts: {selector}") from last_error
@@ -241,7 +265,7 @@ class CpcbWasteTyreBot:
                 tag = element.tag_name.lower()
                 input_type = (element.get_attribute("type") or "").lower()
                 element_class = (element.get_attribute("class") or "").lower()
-                print(f"{input_type} - {tag} - {selector_key} - {selector} - {element_class}")
+                # print(f"{input_type} - {tag} - {selector_key} - {selector} - {element_class}")
 
                 if input_type == "file":
                     element.send_keys(str(value))
@@ -268,6 +292,8 @@ class CpcbWasteTyreBot:
                     day_selector = self.config.selectors.get("select_day") + "[text()='" + str(day) + "']"
                     self._click_with_retry(day_selector)
                 elif "table" in tag.lower():
+                    if str(value) == "":
+                        return
                     self._set_product_weight(selector, value, selector_key)
                 else:
                     element.clear()
@@ -277,13 +303,34 @@ class CpcbWasteTyreBot:
                 last_error = exc
         raise TimeoutException(f"Could not fill field: {selector_key} - {value} - {selectors}") from last_error
     
-    def _set_product_weight(self, selector: str, value: Any, selector_key: str | None = None):
+    def _set_product_weight(self, selector: str, value: Any, selector_key: str | None = None) -> None:
+        product_map = {
+            "reclaimed rubber": "Reclaimed Rubber",
+            "recovered carbon black": "Recovered Carbon Black",
+            "crumb rubber modified bitumen": "Crumb Rubber Modified Bitumen",
+            "crumb rubber": "Crumb Rubber",
+            "pyrolysis oil or char": "Pyrolysis oil or Char "
+        }
+
         products_weights = str(value).strip().split(",")
+        # print(products_weights)
         for item in products_weights:
             product, weight = item.strip().split(":")
-            product = product.strip()
+            product = product_map[product.strip().lower()]
             weight = weight.strip()
-            weight_selector = selector + "//tbody//tr//*[contains(text(),'" + product + "')]"
+            # print(product + " : " + weight)
+            if product == "Pyrolysis oil or Char ":
+                # weight is of the form "Batch-10" or "Continuous-5"
+                ptype, weight = weight.split("-")
+                ptype = ptype.strip()
+                weight = weight.strip()
+                if ptype.lower() == "continuous":
+                    ptype_selector = "//*[@id='choice_2']"
+                    self._click_with_retry(ptype_selector)
+                # print(ptype + " && " + weight)
+            
+            weight_selector = selector + "/tbody/tr//*[text()='" + product + "']/following-sibling::td[4]/input"
+            # print(weight_selector)
             element = self._find_with_retry(weight_selector)
             element.clear()
             element.send_keys(str(weight))
@@ -298,7 +345,7 @@ class CpcbWasteTyreBot:
     def _find_with_retry(
         self,
         selector: str,
-        attempts: int = 10,
+        attempts: int = 5,
         timeout: int | None = None,
         pause_seconds: float = 1.0,
     ) -> WebElement:
