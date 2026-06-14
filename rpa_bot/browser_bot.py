@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
+import json
 import logging
 from pathlib import Path
 from time import sleep
 from typing import Callable, Iterable, Any
 
+from openpyxl import Workbook, load_workbook
 from selenium import webdriver
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException
 from selenium.webdriver.chrome.options import Options as ChromeOptions
@@ -41,6 +43,7 @@ class CpcbWasteTyreBot:
         self.prompt = prompt
         self.status = status
         self.driver: WebDriver | None = None
+        self.failed_rows_file = Path(__file__).resolve().parent.parent / "logs" / "failed_rows.xlsx"
         self.log = logging.getLogger(self.__class__.__name__)
 
     def open_browser(self) -> None:
@@ -116,6 +119,7 @@ class CpcbWasteTyreBot:
                 self.status(f"{dataset.title()} row {row.row_number} completed")
             except Exception as exc:
                 self.state.mark_failed(dataset, row.row_id)
+                self._record_failed_row(dataset, row, exc)
                 self.log.exception("%s row %s failed: %s", dataset, row.row_number, exc)
                 self.status(f"{dataset.title()} row {row.row_number} failed. See errors.")
 
@@ -148,6 +152,55 @@ class CpcbWasteTyreBot:
             return self.sales_invoice_folder
         return self.purchase_invoice_folder
 
+    def _record_failed_row(self, dataset: str, row: DataRow, exc: Exception) -> None:
+        try:
+            self.failed_rows_file.parent.mkdir(parents=True, exist_ok=True)
+            if self.failed_rows_file.exists():
+                workbook = load_workbook(self.failed_rows_file)
+                sheet = workbook.active
+            else:
+                workbook = Workbook()
+                sheet = workbook.active
+                sheet.title = "Failed Rows"
+
+            base_headers = ["failed_at", "dataset", "row_number", "row_id", "error"]
+            row_headers = list(row.values.keys())
+            required_headers = base_headers + [header for header in row_headers if header not in base_headers]
+
+            existing_headers = [
+                cell.value
+                for cell in sheet[1]
+                if cell.value is not None
+            ] if sheet.max_row >= 1 else []
+
+            if sheet["A1"].value is None:
+                for col_num, header in enumerate(required_headers, start=1):
+                    sheet.cell(row=1, column=col_num, value=header)
+                existing_headers = required_headers
+            else:
+                for header in required_headers:
+                    if header not in existing_headers:
+                        existing_headers.append(header)
+                        sheet.cell(row=1, column=len(existing_headers), value=header)
+
+            audit_values = {
+                "failed_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "dataset": dataset,
+                "row_number": row.row_number,
+                "row_id": row.row_id,
+                "error": str(exc),
+                **row.values,
+            }
+            sheet.append([self._excel_safe_value(audit_values.get(header)) for header in existing_headers])
+            workbook.save(self.failed_rows_file)
+        except Exception as log_exc:
+            self.log.exception("Failed to write row %s to failed-row workbook: %s", row.row_number, log_exc)
+
+    def _excel_safe_value(self, value: Any) -> Any:
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            return value
+        return json.dumps(value, default=str)
+    
     def _select_sales_tab(self, values: dict[str, Any]) -> None:
         sales_type = str(values.get("sales_type") or "domestic").strip().lower()
         key = "tab_import" if sales_type == "import" else "tab_domestic"
@@ -224,7 +277,8 @@ class CpcbWasteTyreBot:
                 return
             except Exception as exc:
                 last_error = exc
-        raise TimeoutException(f"Could not find/click {label} - {selectors}") from last_error
+        # raise TimeoutException(f"Could not find/click {label} - {selectors}") from last_error
+        raise TimeoutException(f"Could not find/click {label}") from last_error
     
     def _click_with_retry(
         self,
@@ -301,7 +355,8 @@ class CpcbWasteTyreBot:
                 return
             except Exception as exc:
                 last_error = exc
-        raise TimeoutException(f"Could not fill field: {selector_key} - {value} - {selectors}") from last_error
+        # raise TimeoutException(f"Could not fill field: {selector_key} - {value} - {selectors}") from last_error
+        raise TimeoutException(f"Could not fill field: {selector_key} - {value}") from last_error
     
     def _set_product_weight(self, selector: str, value: Any, selector_key: str | None = None) -> None:
         product_map = {
@@ -325,7 +380,7 @@ class CpcbWasteTyreBot:
                 ptype = ptype.strip()
                 weight = weight.strip()
                 if ptype.lower() == "continuous":
-                    ptype_selector = "//*[@id='choice_2']"
+                    ptype_selector = "//*[@id='choice_2']/following-sibling::label[@for='choice_2']"
                     self._click_with_retry(ptype_selector)
                 # print(ptype + " && " + weight)
             

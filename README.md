@@ -11,6 +11,7 @@ Desktop automation scaffold for the CPCB Waste Tyre EPR portal workflow describe
 - Checks that invoice PDFs exist before upload.
 - Continues from the last unprocessed row using `state/bot_state.json`.
 - Logs every success and failure to `logs/rpa_bot.log`.
+- Writes failed row data to `logs/failed_rows.xlsx`.
 - Shows recent errors from the GUI.
 
 ## Run
@@ -40,3 +41,8 @@ python app.py
 - In case of Pyrolysis product the value should be:
     - Pyrolysis oil or Char:Batch-10
     - Pyrolysis oil or Char:Continuous-10
+
+## Breaking down the unique "row_id" found in "bot_state.json" and "failed_rows.xlsx":
+- Procurement: "row-{row_number}-{invoice_number}-{supplier_name}-"
+- Recycling: "row-{row_number}-{source_of_waste_tyre}-{recycled_material_type}-{quantity_processed_mt}-{recycled_date}"
+- Sales: "row-{row_number}-{invoice_number}--{buyer_name}"

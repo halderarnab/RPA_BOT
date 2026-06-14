@@ -2,7 +2,7 @@
   "portal_url": "https://eprtyres.cpcb.gov.in/login",
   "browser": "chrome",
   "headless": false,
-  "timeout_seconds": 30,
+  "timeout_seconds": 10,
   "selectors": {
     "login_id": ["//*[@id='email']"],
     "password": ["//*[@id='password1']"],
